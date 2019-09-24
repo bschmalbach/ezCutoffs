@@ -18,3 +18,13 @@ Nötige Funktionen für das Frontend sind:
   <li>Eingabe von Simulationsparametern</li>
   <li>Einstellung von Output Parametern</li>
 </ul>
+
+
+
+Features, die ich noch in R implementieren will, die dann auch das Frontend teilweise tangieren würden:
+<ul>
+  <li>Multiple group CFAs</li>
+  <ul>
+    <li>generate model fit and data for all groups separately, then combine and test for invariance</li>
+  </ul>
+</ul>
