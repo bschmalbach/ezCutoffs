@@ -26,5 +26,6 @@ Features, die ich noch in R implementieren will, die dann auch das Frontend teil
   <li>Multiple group CFAs</li>
   <ul>
     <li>generate model fit and data for all groups separately, then combine and test for invariance</li>
+    <li>Konsequenz für Frontend = Man muss die Gruppenvariable deklarieren können</li>
   </ul>
 </ul>
