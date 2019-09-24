@@ -12,7 +12,7 @@ Anzahl der Replikationen, Welche Fit Indizes, Welcher Schätzer, Welches Alpha N
 Man kann es entweder bei Shiny als Web App programmieren oder Alex schlug vor qt zu nutzen.
 
 Nötige Funktionen für das Frontend sind:
--Datenimport (.csv, .sav[mittels R-package foreign])
+-Datenimport (.csv, .sav[mittels R-package foreign])<br>
 -Model Maker (Modelleingabe erleichtern indem man sie zeichnet o.ä.)
 -Eingabe von Simulationsparametern
 -Einstellung von Output Parametern
