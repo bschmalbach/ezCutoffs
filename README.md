@@ -4,15 +4,17 @@ Grundsetzlich geht es bei meinem/unserem Programm mit dem glorreichen Namen ezCu
 
 Ihr beiden würdet dann insofern ins Spiel kommen, dass ich das R-Paket ganz gerne auch von R loslösen wollen würde, und vor allem dann auch komfortabler umsetzen wollen würde mit GUI und so.
 
-Der R-Befehl sehe so aus: ezcutoffs(model, data)
+Der R-Befehl sieht so aus: ezcutoffs(model, data, ...)
 
-Wobei im Hintergrund viel individuell anpassbar ist wie zB
-Anzahl der Replikationen, Welche Fit Indizes, Welcher Schätzer, Welches Alpha Niveau etc..
+Wobei unter ... viel anpassbar ist wie zB
+Anzahl der Replikationen, Welche Fit Indizes, Welcher Schätzer, Welches Alpha Niveau etc.
 
 Man kann es entweder bei Shiny als Web App programmieren oder Alex schlug vor qt zu nutzen.
 
 Nötige Funktionen für das Frontend sind:
--Datenimport (.csv, .sav[mittels R-package foreign])<br>
--Model Maker (Modelleingabe erleichtern indem man sie zeichnet o.ä.)
--Eingabe von Simulationsparametern
--Einstellung von Output Parametern
+<ul>
+  <li>Datenimport (.csv, .sav[mittels R-package foreign])</li>
+  <li>Model Maker (Modelleingabe erleichtern indem man sie zeichnet o.ä.)</li>
+  <li>Eingabe von Simulationsparametern</li>
+  <li>Einstellung von Output Parametern</li>
+</ul>
