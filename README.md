@@ -14,7 +14,7 @@ Man kann es entweder bei Shiny als Web App programmieren oder Alex schlug vor qt
 Nötige Funktionen für das Frontend sind:
 <ul>
   <li>Datenimport (.csv, .sav[mittels R-package foreign])</li>
-  <li>Model Maker (Modelleingabe erleichtern indem man sie zeichnet o.ä.)</li>
+  <li>evtl. Model Maker (Modelleingabe erleichtern indem man sie zeichnet o.ä.)</li>
   <li>Eingabe von Simulationsparametern</li>
   <li>Einstellung von Output Parametern</li>
 </ul>
