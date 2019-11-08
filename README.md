@@ -1,6 +1,6 @@
 # ezCutoffs
 
-Grundsetzlich geht es bei unserem Programm mit dem Namen ezCutoffs darum, Cutoffs - also Grenzwerte, für Fit Indizes in Strukturgleichungsmodellen zu genrieren. Das macht man anhand von simulierten Daten, was sich alles in R lösen lassen würde.
+Grundsetzlich geht es bei unserem Programm mit dem Namen ezCutoffs darum, Cutoffs - also Grenzwerte, für Fit Indizes in Strukturgleichungsmodellen zu generieren. Das macht man anhand von simulierten Daten, was sich alles in R lösen lassen würde.
 
 Ihr beiden würdet dann insofern ins Spiel kommen, dass wir das R-Paket ganz gerne auch von R loslösen wollen würde, und vor allem dann auch komfortabler umsetzen wollen würde mit GUI und so.
 
