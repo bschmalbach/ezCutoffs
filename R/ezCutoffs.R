@@ -4,7 +4,7 @@
 #' @importFrom foreach %dopar%
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom stats sd median quantile wilcox.test
-#' @description Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets with the same parameters (population model, number of observations).
+#' @description Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi: 10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 #' @param model \link[lavaan]{lavaan}-style Syntax of a user-specified model.
 #' @param data A data frame containing the variables specified in model.
 #' @param n_obs Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses.
@@ -30,6 +30,7 @@
 #'
 #' @references Efron, D. (1981). Nonparametric estimates of standard error: The jackknife, the bootstrap and other methods, Biometrika,  68(3), 589-599. doi: 10.1093/biomet/68.3.589 \cr
 #' @references Efron, B. (1987). Better bootstrap confidence intervals. Journal of the American statistical Association, 82(397), 171-185.
+#' @references Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling: A Multidisciplinary Journal, 6(1), 1-55. doi: 10.1080/10705519909540118
 #'
 #' @return An object of the class ezCutoffs, inspectable via \code{print}, \code{summary}, \code{plot}, and
 #' \code{\link{compareFit}}
