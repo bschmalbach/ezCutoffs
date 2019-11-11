@@ -44,7 +44,7 @@ An object of the class ezCutoffs, inspectable via \code{print}, \code{summary}, 
 \code{\link{compareFit}}
 }
 \description{
-Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets with the same parameters (population model, number of observations).
+Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi: 10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 }
 \details{
 \code{model} is expected in standard lavaan nomenclature. The typical pre-multiplication mechanism is supported, with the exception of vectors (see Examples). Multigroup models should instead be specified using the \code{group} argument. \cr\cr
@@ -89,6 +89,8 @@ plot(out)
 Efron, D. (1981). Nonparametric estimates of standard error: The jackknife, the bootstrap and other methods, Biometrika,  68(3), 589-599. doi: 10.1093/biomet/68.3.589 \cr
 
 Efron, B. (1987). Better bootstrap confidence intervals. Journal of the American statistical Association, 82(397), 171-185.
+
+Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling: A Multidisciplinary Journal, 6(1), 1-55. doi: 10.1080/10705519909540118
 }
 \seealso{
 \code{\link{compareFit}}
