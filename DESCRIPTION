@@ -8,10 +8,9 @@ Authors@R: c(person(given = "Bjarne", family = "Schmalbach",
                     comment = c(ORCID = "0000-0001-6853-412X"),
                     role = c("aut", "cre"), 
                     email = "bjarne.schmalbach@gmail.com"),
-              person(given = "Julien", family = "Irmer", role= "aut"),
+              person(given = "Julien Patrick", family = "Irmer", role= "aut"),
               person(given = "Martin", family = "Schultze", role = "aut"))
-Description: Calculate cutoff values for model fit measures used in structural equation modeling by simulating data sets 
-    with the same parameters (population model, number of observations).
+Description: Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi: 10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 License: GPL-3
 Imports: doSNOW, foreach, ggplot2, lavaan, moments, parallel, progress,
         stats, utils
@@ -21,7 +20,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Author: Bjarne Schmalbach [aut, cre] (<https://orcid.org/0000-0001-6853-412X>),
-  Julien Irmer [aut],
+  Julien Patrick Irmer [aut],
   Martin Schultze [aut]
 NeedsCompilation: no
 Packaged: 2019-11-09 11:44:31 UTC; q7
