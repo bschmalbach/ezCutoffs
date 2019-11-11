@@ -1,0 +1,13 @@
+citHeader("To cite ezCutoffs in publications use:")
+
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Manual",
+         title = "ezCutoffs: Calculate Fit Measure Cutoffs",
+         author = c(person("Bjarne", "Schmalbach"),
+                    person("Julien", "Irmer"),
+                    person("Martin", "Schultze")),
+         year = year,
+         note = note,
+         url = "https://CRAN.R-project.org/package=ezCutoffs")
