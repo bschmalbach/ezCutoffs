@@ -1,10 +1,10 @@
-#' Calculate Fit Measure Cutoffs
+#' Fit Measure Cutoffs in SEM
 #' @import ggplot2 lavaan moments progress utils
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom foreach %dopar%
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom stats sd median quantile wilcox.test
-#' @description Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi: 10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
+#' @description Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 #' @param model \link[lavaan]{lavaan}-style Syntax of a user-specified model.
 #' @param data A data frame containing the variables specified in model.
 #' @param n_obs Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses.
@@ -56,10 +56,10 @@
 #'
 #' ## function call
 #' out <- ezCutoffs(model = model1, n_obs = 1000, n_rep = 10, n_cores = 1)
-#' \dontrun{
+#' \donttest{
 #' out <- ezCutoffs(
 #'   model = model1, n_obs = c(300, 400), n_rep = 9999, fit_indices = c("cfi.robust"),
-#'   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts")
+#'   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts"), n_cores = 2
 #' )
 #' }
 #'
