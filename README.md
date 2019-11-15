@@ -8,7 +8,7 @@ help files.
 
 
 <h4>Change log</h4>
-<u>1.0.1</u>
+1.0.1
 <li>
   <ul>missing_data = "missing" now also works correctly when not using missing = "fiml" estimation, leading to list-wise deletion.</ul>
   <ul></ul>
