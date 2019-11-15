@@ -1,7 +1,7 @@
 Package: ezCutoffs
 Date: 2019-11-09
 Type: Package
-Title: Calculate Fit Measure Cutoffs
+Title: Fit Measure Cutoffs in SEM
 Version: 1.0.0
 Depends: R (>= 2.15.1)
 Authors@R: c(person(given = "Bjarne", family = "Schmalbach",
@@ -10,7 +10,7 @@ Authors@R: c(person(given = "Bjarne", family = "Schmalbach",
                     email = "bjarne.schmalbach@gmail.com"),
               person(given = "Julien Patrick", family = "Irmer", role= "aut"),
               person(given = "Martin", family = "Schultze", role = "aut"))
-Description: Calculate cutoff values for model fit measures used in structural equation modeling by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi: 10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
+Description: Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 License: GPL-3
 Imports: doSNOW, foreach, ggplot2, lavaan, moments, parallel, progress,
         stats, utils
