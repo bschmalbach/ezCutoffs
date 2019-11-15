@@ -112,8 +112,9 @@ ezCutoffs <- function(model = NULL,
      }else{                                                                    
           fit <- lavaan::sem(model = model, data = data, ...)                 
           
-     }      fit_measures <- lavaan::fitMeasures(fit)
-  empirical_fit <- fit_measures
+     }      
+     fit_measures <- lavaan::fitMeasures(fit)
+     empirical_fit <- fit_measures
 
   # parallel processing setup -----------------------------------------------------------------------
   if (is.null(n_cores)) {
