@@ -59,7 +59,7 @@
 #' \donttest{
 #' out <- ezCutoffs(
 #'   model = model1, n_obs = c(300, 400), n_rep = 9999, fit_indices = c("cfi.robust"),
-#'   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts"), n_cores = 2
+#'   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts"), n_cores = 1
 #' )
 #' }
 #'
