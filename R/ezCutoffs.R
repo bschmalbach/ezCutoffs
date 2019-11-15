@@ -107,8 +107,12 @@ ezCutoffs <- function(model = NULL,
     }
   }
 
-  fit <- lavaan::sem(model = model, data = data, ...)
-  fit_measures <- lavaan::fitMeasures(fit)
+     if(missing_data == "missing"){                                           
+          fit <- lavaan::sem(model = model, data = data, missing = "fiml",  ...) 
+     }else{                                                                    
+          fit <- lavaan::sem(model = model, data = data, ...)                 
+          
+     }      fit_measures <- lavaan::fitMeasures(fit)
   empirical_fit <- fit_measures
 
   # parallel processing setup -----------------------------------------------------------------------
@@ -121,32 +125,52 @@ ezCutoffs <- function(model = NULL,
 
   # empirical fit - bootstrapped CI -----------------------------------------------------------------
   if (bootstrapped_ci) {
-    message(paste("Bootstrapping Confidence Interval for Model Fit Indices with", n_boot, "Replications and Type I-Error Rate of alpha = ", boot_alpha, "...\n"))
-
+       if(missing_data == "missing"){                                                      
+            message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",     
+                          n_boot, "Replications and Type I-Error Rate of alpha = ",           
+                          boot_alpha, " using FIML...\n"))    }else{                          
+                               message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",     
+                                             n_boot, "Replications and Type I-Error Rate of alpha = ",           
+                                             boot_alpha, "...\n"))                                                
+                          }
     par_type <- ifelse(n_cores > 1, "snow", "no")
-    if (n_cores == 1) message("Only one CPU core detected. Check whether this is valid.")
+    if (n_cores == 1) message("Only one CPU core used. Check whether this is valid.") 
 
     if (boot_internal) {
-      fitb <- lavaan::sem(model, data)
-      bootstrapped_fitind <- list()
+         if(missing_data == "missing"){                                  
+              fitb <- lavaan::sem(model, data, missing = "fiml", ...)   
+         }else{                                                         
+              fitb <- lavaan::sem(model, data, ...)                     
+         }
+         bootstrapped_fitind <- list()
       bootstrapped_fitind$t <- lavaan::bootstrapLavaan(fitb,
         R = n_boot,
         FUN = lavaan::fitMeasures, parallel = par_type, ncpus = n_cores,
         fit.measures = fit_indices, ...
       )
     } else {
-      fitmeasures_bootstrap <- function(model, data, fit_indices, indices) {
-        d <- data[indices, ] # allows boot to select sample
-        fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d), fit.measures = fit_indices), silent = T)
-        if (!inherits(fitb, "try-error")) { # if does not have issues
-          return(fitb) # return fit indices,
-        } else { # put NA otherwise
-          return(rep(NA, length(fit_indices)))
-        }
+         fitmeasures_bootstrap <- function(model, data, fit_indices, 
+                                           indices, missing_data = "complete") { 
+              d <- data[indices, ]
+              
+              if(missing_data == "missing"){                                           
+                   fitb <- try(lavaan::fitmeasures(lavaan::sem(model,                       
+                                                               d, missing = "fiml", ...),   
+                                                   fit.measures = fit_indices), silent = T) 
+              }else{                                                                    
+                   fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
+                                                   fit.measures = fit_indices), silent = T) 
+              }
+              if (!inherits(fitb, "try-error")) {
+                   return(fitb)
+              }
+              else {
+                   return(rep(NA, length(fit_indices)))
+              }
       }
       bootstrapped_fitind <- boot::boot(
         data = data, model = model, fit_indices = fit_indices, statistic = fitmeasures_bootstrap,
-        R = n_boot, ncpus = n_cores, parallel = "snow", ...
+        R = n_boot, ncpus = n_cores, parallel = par_type, ...
       )
     }
 
@@ -218,7 +242,6 @@ ezCutoffs <- function(model = NULL,
 
   # add missings if requested
   if (missing_data == "missing") {
-    misses <- list()
     var_table <- lavaan::varTable(fit)
 
     if (n_groups > 1) {
@@ -229,22 +252,17 @@ ezCutoffs <- function(model = NULL,
           d_comp <- rep(0, times = n_comp)
           d_miss <- rep(1, times = n_miss)
           d_both <- sample(c(d_comp, d_miss), size = sum(group_sizes), replace = FALSE)
-          v_miss <- match(1, d_both)
+          v_miss <- which(d_both == 1)
           data_s_list[[i]][v_miss, v] <- NA
         }
       }
     } else {
-      for (i in 1:n_rep) {
-        for (v in 1:nrow(var_table)) {
-          n_comp <- var_table[v, "nobs"]
-          n_miss <- (n - n_comp)
-          d_comp <- rep(0, times = n_comp)
-          d_miss <- rep(1, times = n_miss)
-          d_both <- sample(c(d_comp, d_miss), size = n, replace = FALSE)
-          v_miss <- match(1, d_both)
-          data_s_list[[i]][v_miss, v] <- NA
-        }
-      }
+         missings <- apply(data, 2, function(x) which(is.na(x)))
+         for (i in 1:n_rep) {
+              for (v in 1:nrow(var_table)) {
+                   data_s_list[[i]][missings[[v]], v] <- NA # use same missing template as given data
+              }
+         }
     }
   }
 
@@ -253,9 +271,17 @@ ezCutoffs <- function(model = NULL,
 
 
   fit_s_list <- vector("list", length = n_rep)
-  estimation <- function(i, ...) {
-    lavaan::sem(model = model, data = data_s_list[[i]], ...)
-  }
+  if (missing_data == "missing") {
+       message("FIML used to estimate SEM.")
+       estimation <- function(i, ...) {
+            lavaan::sem(model = model, data = data_s_list[[i]],  missing = "fiml",
+                        ...)
+       }}else{
+            estimation <- function(i, ...) {
+                 lavaan::sem(model = model, data = data_s_list[[i]], 
+                             ...)
+            }
+       }
   # progress bar
   pb <- progress::progress_bar$new(
     format = "  |:bar| :percent elapsed = :elapsed  ~ :eta",
