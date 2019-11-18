@@ -245,28 +245,14 @@ ezCutoffs <- function(model = NULL,
   if (missing_data == "missing") {
     var_table <- lavaan::varTable(fit)
 
-    if (n_groups > 1) {
-      for (i in 1:n_rep) {
-        for (v in 1:nrow(var_table)) {
-          n_comp <- var_table[v, "nobs"]
-          n_miss <- (sum(group_sizes) - n_comp)
-          d_comp <- rep(0, times = n_comp)
-          d_miss <- rep(1, times = n_miss)
-          d_both <- sample(c(d_comp, d_miss), size = sum(group_sizes), replace = FALSE)
-          v_miss <- which(d_both == 1)
-          data_s_list[[i]][v_miss, v] <- NA
-        }
+    missings <- apply(data, 2, function(x) which(is.na(x)))
+    for (i in 1:n_rep) {
+      for (v in 1:nrow(var_table)) {
+        data_s_list[[i]][missings[[v]], v] <- NA # use same missing template as given data
       }
-    } else {
-         missings <- apply(data, 2, function(x) which(is.na(x)))
-         for (i in 1:n_rep) {
-              for (v in 1:nrow(var_table)) {
-                   data_s_list[[i]][missings[[v]], v] <- NA # use same missing template as given data
-              }
-         }
     }
   }
-
+                      
   # fit data in lavaan for fitmeasures()----------------------------------------------
   message("\nModel Fitting\n")
 
