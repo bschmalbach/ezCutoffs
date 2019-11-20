@@ -260,13 +260,11 @@ ezCutoffs <- function(model = NULL,
   fit_s_list <- vector("list", length = n_rep)
   if (missing_data == "missing") {
        message("FIML used to estimate SEM.")
-       estimation <- function(i, ...) {
-            lavaan::sem(model = model, data = data_s_list[[i]],  missing = "fiml",
-                        ...)
+       estimation <- function(i) {
+           suppressWarnings(lavaan::sem(model = model, data = data_s_list[[i]],  missing = "fiml", ...))
        }}else{
-            estimation <- function(i, ...) {
-                 lavaan::sem(model = model, data = data_s_list[[i]], 
-                             ...)
+           estimation <- function(i) {
+              suppressWarnings(lavaan::sem(model = model, data = data_s_list[[i]], ...))
             }
        }
   # progress bar
@@ -283,9 +281,9 @@ ezCutoffs <- function(model = NULL,
     cl <- parallel::makeCluster(n_cores)
     doSNOW::registerDoSNOW(cl)
     # foreach loop ------------------------------------------------------------
-    fit_s_list <- foreach::foreach(i = 1:n_rep, .options.snow = list(progress = progress)) %dopar% {
+    suppressWarnings(fit_s_list <- foreach::foreach(i = 1:n_rep, .options.snow = list(progress = progress)) %dopar% {
       estimation(i)
-    }
+    })
     parallel::stopCluster(cl)
   } else {
     for (i in 1:n_rep) {
@@ -361,9 +359,9 @@ ezCutoffs <- function(model = NULL,
   # simulation stats----------------------------------------------------------
 
   n_conv <- sum(!is.na(fit_distributions[, 1]))
-  s_est <- lavaan::lavInspect(fit, what = "call")$estimator
+  s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "call")$estimator
   if (length(s_est) == 0) {
-    s_est <- lavaan::lavInspect(fit, what = "options")$estimator
+    s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "options")$estimator
   }
   simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n), 1, 5))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
