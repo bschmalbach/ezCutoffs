@@ -10,15 +10,15 @@ a more detailed description of the packages functionalities see the integrated
 help files.
 
 
-### Installation
+### Installation (from CRAN)
 
-``` From CRAN
+``` 
 install.packages("ezCutoffs")
 ```
 
-#### The latest working version (including bug fixes etc.)
+#### The latest working version on GitHub (including bug fixes etc.)
 
-``` From GitHub
+```
 install.packages("devtools")
 devtools::install_github("bschmalbach/ezCutoffs")
 ```
