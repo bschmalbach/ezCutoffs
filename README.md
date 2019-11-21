@@ -23,4 +23,4 @@ install.packages("devtools")
 devtools::install_github("bschmalbach/ezCutoffs")
 ```
 ___________________________________
-If you encounter errors, bugs, or otherwise unexpected results, please give us a heads-up at [github](https://github.com/bschmalbach/ezCutoffs/issues) or at bjarne.schmalbach@gmail.com.
+If you encounter any errors, bugs, or otherwise unexpected results, please give us a heads-up at [github](https://github.com/bschmalbach/ezCutoffs/issues) or at bjarne.schmalbach@gmail.com.
