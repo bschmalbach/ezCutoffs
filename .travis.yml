@@ -6,5 +6,5 @@ r:
   - devel
   
 script:
-  - R CMD build . --compact-vignettes=gs+qpdf
+  - R CMD build
   - R CMD check *tar.gz --as-cran
