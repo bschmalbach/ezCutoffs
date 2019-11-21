@@ -22,4 +22,5 @@ install.packages("ezCutoffs")
 install.packages("devtools")
 devtools::install_github("bschmalbach/ezCutoffs")
 ```
-
+___________________________________
+If you encounter errors, bugs, or otherwise unexpected results, please give us a heads-up at [github](https://github.com/tidyverse/dplyr/issues) or at bjarne.schmalbach@gmail.com.
