@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/bschmalbach/ezCutoffs.svg?branch=master)](https://travis-ci.org/bschmalbach/ezCutoffs)
+
 # ezCutoffs
 
 This is an R-Package for generating instance-specific cut-off values for
