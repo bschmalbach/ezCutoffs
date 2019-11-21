@@ -1,5 +1,10 @@
 language: r
+
 r:
   - oldrel
   - release
   - devel
+  
+script:
+  - R CMD build . --compact-vignettes=gs+qpdf
+  - R CMD check *tar.gz --as-cran
