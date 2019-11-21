@@ -10,7 +10,7 @@ a more detailed description of the packages functionalities see the integrated
 help files.
 
 
-### Installation (from CRAN)
+#### Installation (from CRAN)
 
 ``` 
 install.packages("ezCutoffs")
