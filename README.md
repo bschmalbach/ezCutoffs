@@ -1,3 +1,4 @@
+[![CRAN status](https://www.r-pkg.org/badges/version/ezCutoffs)](https://cran.r-project.org/package=ezCutoffs)
 [![Build Status](https://travis-ci.org/bschmalbach/ezCutoffs.svg?branch=master)](https://travis-ci.org/bschmalbach/ezCutoffs)
 
 # ezCutoffs
