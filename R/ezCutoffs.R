@@ -12,7 +12,7 @@
 #' @param fit_indices Character vector, containing a selection of fit indices for which to calculate cutoff values. Only measures produced by \link[lavaan]{fitMeasures} can be chosen.
 #' @param alpha_level Type I-error rate for the generated cutoff values: Between 0 and 1; 0.05 per default.
 #' @param normality Specify distributional assumptions for the simulated data: Either \code{"assumed"} for normal distribution, or \code{"empirical"} for distributions based on the skewness and kurtosis values of the empirical data.
-#' @param missing_data Specify handling of missing values: Either \code{"complete"} to generate complete data sets, or \code{"missing"} to generate data with the same number of missing values on the observed variables as in the empirical data. \code{"missing"} should only be run using \code{"MLR"} estimation with \code{"missing = "FIML""}. Other arguments may lead to errors.
+#' @param missing_data Specify handling of missing values: Either \code{"complete"} to generate complete data sets, or \code{"missing"} to generate data with the same number of missing values on the observed variables as in the empirical data.
 #' @param bootstrapped_ci Specify whether a boostrapped confidence interval for the empirical model fit statistics should be drawn; default = FALSE.
 #' @param n_boot Number of replications in bootstrap for confidence intervalls for empirical model fit statistics.
 #' @param boot_alpha Type I-error rate choosen for the boostrap-confidence interval: Between 0 and 1; 0.05 per default.
@@ -106,15 +106,10 @@ ezCutoffs <- function(model = NULL,
       names(data)[ncol(data)] <- "group"
     }
   }
-
-     if(missing_data == "missing"){                                           
-          fit <- lavaan::sem(model = model, data = data, missing = "fiml",  ...) 
-     }else{                                                                    
-          fit <- lavaan::sem(model = model, data = data, ...)                 
-          
-     }      
-     fit_measures <- lavaan::fitMeasures(fit)
-     empirical_fit <- fit_measures
+  
+  fit <- lavaan::sem(model = model, data = data,  ...) 
+  fit_measures <- lavaan::fitMeasures(fit)
+  empirical_fit <- fit_measures
 
   # parallel processing setup -----------------------------------------------------------------------
   if (is.null(n_cores)) {
@@ -123,60 +118,43 @@ ezCutoffs <- function(model = NULL,
     n_cores <- 1
   }
 
-
   # empirical fit - bootstrapped CI -----------------------------------------------------------------
   if (bootstrapped_ci) {
-       if(missing_data == "missing"){                                                      
-            message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",     
-                          n_boot, "Replications and Type I-Error Rate of alpha = ",           
-                          boot_alpha, " using FIML...\n"))    }else{                          
-                               message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",     
-                                             n_boot, "Replications and Type I-Error Rate of alpha = ",           
-                                             boot_alpha, "...\n"))                                                
-                          }
+    
+    message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",
+                  n_boot, "Replications and Type I-Error Rate of alpha = ", boot_alpha, "...\n"))                                                
+                          
     par_type <- ifelse(n_cores > 1, "snow", "no")
     if (n_cores == 1) message("Only one CPU core used. Check whether this is valid.") 
 
     if (boot_internal) {
-         if(missing_data == "missing"){                                  
-              fitb <- lavaan::sem(model, data, missing = "fiml", ...)   
-         }else{                                                         
-              fitb <- lavaan::sem(model, data, ...)                     
-         }
-         bootstrapped_fitind <- list()
+      fitb <- lavaan::sem(model, data, ...)                     
+      bootstrapped_fitind <- list()
       bootstrapped_fitind$t <- lavaan::bootstrapLavaan(fitb,
         R = n_boot,
         FUN = lavaan::fitMeasures, parallel = par_type, ncpus = n_cores,
-        fit.measures = fit_indices, ...
+        fit.measures = fit_indices
       )
     } else {
-         fitmeasures_bootstrap <- function(model, data, fit_indices, 
-                                           indices, missing_data = "complete") { 
-              d <- data[indices, ]
-              
-              if(missing_data == "missing"){                                           
-                   fitb <- try(lavaan::fitmeasures(lavaan::sem(model,                       
-                                                               d, missing = "fiml", ...),   
-                                                   fit.measures = fit_indices), silent = T) 
-              }else{                                                                    
-                   fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
-                                                   fit.measures = fit_indices), silent = T) 
-              }
-              if (!inherits(fitb, "try-error")) {
-                   return(fitb)
-              }
-              else {
-                   return(rep(NA, length(fit_indices)))
-              }
-      }
+       fitmeasures_bootstrap <- function(model, data, fit_indices, 
+                                         indices) { 
+         d <- data[indices, ]
+         fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
+                                           fit.measures = fit_indices), silent = T)
+
+         if (!inherits(fitb, "try-error")) {
+           return(fitb)
+         } else {
+           return(rep(NA, length(fit_indices)))
+         }
+       }
       bootstrapped_fitind <- boot::boot(
         data = data, model = model, fit_indices = fit_indices, statistic = fitmeasures_bootstrap,
-        R = n_boot, ncpus = n_cores, parallel = par_type, ...
+        R = n_boot, ncpus = n_cores, parallel = par_type
       )
     }
 
     boot_ci <- t(apply(bootstrapped_fitind$t, 2, FUN = function(x) stats::quantile(x = x, probs = c(boot_alpha / 2, 1 - boot_alpha / 2))))
-
     colnames(boot_ci) <- paste0(c("bootstrapped lb (", "bootstrapped ub ("), "alpha = ", boot_alpha, ") of empirical fit")
   }
 
@@ -203,7 +181,6 @@ ezCutoffs <- function(model = NULL,
   # generate random data----------------------------------------------------------
 
   message("Data Generation\n")
-
 
   if (normality == "empirical") { # With Skew/Kurt correction
     var_table <- lavaan::varTable(fit)
@@ -256,17 +233,11 @@ ezCutoffs <- function(model = NULL,
   # fit data in lavaan for fitmeasures()----------------------------------------------
   message("\nModel Fitting\n")
 
-
   fit_s_list <- vector("list", length = n_rep)
-  if (missing_data == "missing") {
-       message("FIML used to estimate SEM.")
-       estimation <- function(i) {
-           suppressWarnings(lavaan::sem(model = model, data = data_s_list[[i]],  missing = "fiml", ...))
-       }}else{
-           estimation <- function(i) {
-              suppressWarnings(lavaan::sem(model = model, data = data_s_list[[i]], ...))
-            }
-       }
+   estimation <- function(i) {
+     lavaan::sem(model = model, data = data_s_list[[i]], ...)
+   }
+
   # progress bar
   pb <- progress::progress_bar$new(
     format = "  |:bar| :percent elapsed = :elapsed  ~ :eta",
