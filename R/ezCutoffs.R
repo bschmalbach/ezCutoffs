@@ -227,7 +227,7 @@ ezCutoffs <- function(model = NULL,
   message("\nModel Fitting\n")
 
   fit_s_list <- vector("list", length = n_rep)
-   estimation <- function(i) {
+   estimation <- function(i, ...) {
      lavaan::sem(model = model, data = data_s_list[[i]], ...)
    }
 
@@ -245,13 +245,13 @@ ezCutoffs <- function(model = NULL,
     cl <- parallel::makeCluster(n_cores)
     doSNOW::registerDoSNOW(cl)
     # foreach loop ------------------------------------------------------------
-    suppressWarnings(fit_s_list <- foreach::foreach(i = 1:n_rep, .options.snow = list(progress = progress)) %dopar% {
-      estimation(i)
-    })
+    fit_s_list <- foreach::foreach(i = 1:n_rep, .options.snow = list(progress = progress)) %dopar% {
+      estimation(i, ...)
+    }
     parallel::stopCluster(cl)
   } else {
     for (i in 1:n_rep) {
-      fit_s <- estimation(i)
+      fit_s <- estimation(i, ...)
       fit_s_list[[i]] <- fit_s
       progress(i)
     }
@@ -327,6 +327,7 @@ ezCutoffs <- function(model = NULL,
   if (length(s_est) == 0) {
     s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "options")$estimator
   }
+  n_sim <- 0                    
   i <- 1
   while (!(n_sim[1]>0)) {
     n_sim <- lavaan::lavInspect(fit_s_list[[i]], what = "nobs")
