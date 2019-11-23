@@ -102,8 +102,6 @@ ezCutoffs <- function(model = NULL,
     } else {
       simgroups <- sample(1:length(n_obs), size = sum(n_obs), replace = TRUE, prob = n_obs)
       data <- lavaan::simulateData(model, sample.nobs = n_obs)
-      data[, (ncol(data) + 1)] <- simgroups
-      names(data)[ncol(data)] <- "group"
     }
   }
   
