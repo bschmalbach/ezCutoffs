@@ -212,6 +212,7 @@ ezCutoffs <- function(model = NULL,
   }
 
   # add missings if requested
+  if (sum(is.na(data))==0) {missing_data="complete"} #check that there actually is missing data, if not switch to complete
   if (missing_data == "missing") {
     var_table <- lavaan::varTable(fit)
 
@@ -336,6 +337,7 @@ ezCutoffs <- function(model = NULL,
   simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, 5))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
   rownames(simulation_stats) <- ""
+  
 
 
   # include bootstrapping CI in ouput -------------------------------------------
