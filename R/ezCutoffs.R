@@ -202,9 +202,9 @@ ezCutoffs <- function(model = NULL,
     progress()
     lavaan::simulateData(pop_model, sample.nobs = group_sizes, group.label = group_labels, skewness = skew, kurtosis = kurt)
   }
-
+  
   group_sizes <- lavaan::lavInspect(fit, what = "nobs")
-
+  
   data_s_list <- vector("list", n_rep)
   data_s_list <- replicate(n_rep, data_generation(), simplify = F)
 
@@ -332,7 +332,12 @@ ezCutoffs <- function(model = NULL,
   if (length(s_est) == 0) {
     s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "options")$estimator
   }
-  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n), 1, 5))
+  i <- 1
+  while (!(n_sim[1]>0)) {
+    n_sim <- lavaan::lavInspect(fit_s_list[[i]], what = "nobs")
+    i <- i+1
+  }
+  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, 5))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
   rownames(simulation_stats) <- ""
 
