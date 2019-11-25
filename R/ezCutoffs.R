@@ -69,8 +69,6 @@
 #' plot(out)
 #' @seealso \code{\link{compareFit}}
 
-
-
 #' @export
 ezCutoffs <- function(model = NULL,
                       data = NULL,
@@ -88,7 +86,6 @@ ezCutoffs <- function(model = NULL,
                       ...) {
 
   # empirical fit-----------------------------------------------------------------
-
 
   # Occurences of c( in model
   if (grepl("\\c\\(", model) == T) {
@@ -234,9 +231,7 @@ ezCutoffs <- function(model = NULL,
     for (i in 1:n_var) {
           pos <- missings[[i]] %in% misses
           missings[[i]] <- missings[[i]][!pos]
-    }
-                      
-                  
+    }                                
                       
     for (i in 1:n_rep) {
       for (v in 1:nrow(var_table)) {
@@ -318,7 +313,6 @@ ezCutoffs <- function(model = NULL,
     "nnfi.scaled", "nnfi.robust", "rfi.scaled", "nfi.scaled", "ifi.scaled", "rni.scaled", "rni.robust", "logl", "unrestricted.logl", "gfi",
     "agfi", "pgfi", "mfi", "rmsea.pvalue", "rmsea.pvalue.scaled", "rmsea.pvalue.robust", "cn_05", "cn_01"
   )
-
 
   for (i in 1:length_di) {
     if ((fit_indices[i] %in% high_cut_index) == T) {
