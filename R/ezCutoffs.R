@@ -12,7 +12,7 @@
 #' @param fit_indices Character vector, containing a selection of fit indices for which to calculate cutoff values. Only measures produced by \link[lavaan]{fitMeasures} can be chosen.
 #' @param alpha_level Type I-error rate for the generated cutoff values: Between 0 and 1; 0.05 per default.
 #' @param normality Specify distributional assumptions for the simulated data: Either \code{"assumed"} for normal distribution, or \code{"empirical"} for distributions based on the skewness and kurtosis values of the empirical data.
-#' @param missing_data Specify handling of missing values: Either \code{"complete"} to generate complete data sets, or \code{"missing"} to generate data with the same number of missing values on the observed variables as in the empirical data.
+#' @param missing_data Specify handling of missing values: Either \code{FALSE} to generate complete data sets, or \code{TRUE} to generate data with the same number of missing values on the observed variables as in the empirical data.
 #' @param bootstrapped_ci Specify whether a boostrapped confidence interval for the empirical model fit statistics should be drawn; default = FALSE.
 #' @param n_boot Number of replications in bootstrap for confidence intervalls for empirical model fit statistics.
 #' @param boot_alpha Type I-error rate choosen for the boostrap-confidence interval: Between 0 and 1; 0.05 per default.
@@ -23,7 +23,7 @@
 #' @details
 #' \code{model} is expected in standard lavaan nomenclature. The typical pre-multiplication mechanism is supported, with the exception of vectors (see Examples). Multigroup models should instead be specified using the \code{group} argument. \cr\cr
 #' If \code{data} is not specified, the program will generate data based on the given \code{model} and \code{n_obs}. A numeric vector would signify multiple groups and \code{group} needs to be set to "group" in this case. Otherwise, \code{n_obs} is disregarded. \cr\cr
-#' \code{missing_data = "missing"} assumes that the data is missing completely at random. That, is missings should not be distributed unevenly in multigroup models, for instance.\cr\cr
+#' \code{missing_data = TRUE} assumes that the data is missing completely at random. That, is missings should not be distributed unevenly in multigroup models, for instance.\cr\cr
 #' \code{bootstrapped_ci = "TRUE"} Returns a nonparametric bootstrap confidence interval that quantifies the uncertainty within a data set with regard to the empirical fit indices. Larger sample sizes should, under ideal circumstances, have smaller confidence intervals. For more information see, e.g., Efron (1981; 1987). Bootstrapping uses the \code{library(boot)} and (if available) several CPUs to compute the confidence intervals via \code{snow}. \cr\cr
 #' \code{...} allows the user to pass lavaan arguments to the model fitting procedure. Options include multigroup, repeated measures, growth curve, and multilevel models.
 #'
@@ -79,7 +79,7 @@ ezCutoffs <- function(model = NULL,
                       fit_indices = c("chisq", "cfi", "tli", "rmsea", "srmr"),
                       alpha_level = 0.05,
                       normality = "assumed",
-                      missing_data = "complete",
+                      missing_data = FALSE,
                       bootstrapped_ci = FALSE,
                       n_boot = 1000,
                       boot_alpha = 0.05,
@@ -212,8 +212,10 @@ ezCutoffs <- function(model = NULL,
   }
 
   # add missings if requested
-  if (sum(is.na(data))==0) {missing_data="complete"} #check that there actually is missing data, if not switch to complete
-  if (missing_data == "missing") {
+  if (sum(is.na(data))==0) {
+    missing_data <- F
+  } #check that there actually is missing data, if not switch to complete
+  if (missing_data == T) {
     var_table <- lavaan::varTable(fit)
 
     missings <- apply(data, 2, function(x) which(is.na(x)))
