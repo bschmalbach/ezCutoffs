@@ -339,7 +339,7 @@ ezCutoffs <- function(model = NULL,
   rownames(simulation_stats) <- ""
   
   dots <- list(...)
-  if (with(dots, exists("missing"))) {
+  if (is.null(dots$missing)==F) {
     simulation_stats[1,6] <- dots$missing
     names(simulation_stats)[6] <- "Missing"
   }
