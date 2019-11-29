@@ -349,7 +349,7 @@ ezCutoffs <- function(model = NULL,
     n_sim <- lavaan::lavInspect(fit_s_list[[i]], what = "nobs")
     i <- i+1
   }
-  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, (4+lengt(n_sim))))
+  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, (4+length(n_sim))))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
   rownames(simulation_stats) <- ""
   
