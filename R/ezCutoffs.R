@@ -352,7 +352,10 @@ ezCutoffs <- function(model = NULL,
   simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, (4+length(n_sim))))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
   rownames(simulation_stats) <- ""
-  
+  if (length(n_sim) > 1) {
+    names(simulation_stats)[5:(4+length(n_sim))] <- c(paste0('n_', group_labels))
+  }
+                      
   dots <- list(...)
   if (is.null(dots$missing)==F) {
     simulation_stats[1, (ncol(simulation_stats)+1)] <- dots$missing
