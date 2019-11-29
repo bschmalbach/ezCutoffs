@@ -349,14 +349,14 @@ ezCutoffs <- function(model = NULL,
     n_sim <- lavaan::lavInspect(fit_s_list[[i]], what = "nobs")
     i <- i+1
   }
-  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, 5))
+  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, (4+lengt(n_sim))))
   names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
   rownames(simulation_stats) <- ""
   
   dots <- list(...)
   if (is.null(dots$missing)==F) {
-    simulation_stats[1,6] <- dots$missing
-    names(simulation_stats)[6] <- "Missing"
+    simulation_stats[1, (length(simulation_stats)+1)] <- dots$missing
+    names(simulation_stats)[(length(simulation_stats)] <- "Missing"
   }
 
   # include bootstrapping CI in ouput -------------------------------------------
