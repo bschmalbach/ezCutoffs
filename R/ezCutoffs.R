@@ -355,8 +355,8 @@ ezCutoffs <- function(model = NULL,
   
   dots <- list(...)
   if (is.null(dots$missing)==F) {
-    simulation_stats[1, (length(simulation_stats)+1)] <- dots$missing
-    names(simulation_stats)[(length(simulation_stats)] <- "Missing"
+    simulation_stats[1, (ncol(simulation_stats)+1)] <- dots$missing
+    names(simulation_stats)[(ncol(simulation_stats)] <- "Missing"
   }
 
   # include bootstrapping CI in ouput -------------------------------------------
