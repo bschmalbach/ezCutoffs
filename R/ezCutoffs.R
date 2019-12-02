@@ -7,7 +7,7 @@
 #' @description Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 #' @param model \link[lavaan]{lavaan}-style Syntax of a user-specified model.
 #' @param data A data frame containing the variables specified in model.
-#' @param n_obs Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses.
+#' @param n_obs Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.
 #' @param n_rep Number of replications.
 #' @param fit_indices Character vector, containing a selection of fit indices for which to calculate cutoff values. Only measures produced by \link[lavaan]{fitMeasures} can be chosen.
 #' @param alpha_level Type I-error rate for the generated cutoff values: Between 0 and 1; 0.05 per default.
@@ -27,14 +27,12 @@
 #' \code{bootstrapped_ci = "TRUE"} Returns a nonparametric bootstrap confidence interval that quantifies the uncertainty within a data set with regard to the empirical fit indices. Larger sample sizes should, under ideal circumstances, have smaller confidence intervals. For more information see, e.g., Efron (1981; 1987). Bootstrapping uses the \code{library(boot)} and (if available) several CPUs to compute the confidence intervals via \code{snow}. \cr\cr
 #' \code{...} allows the user to pass lavaan arguments to the model fitting procedure. Options include multigroup, repeated measures, growth curve, and multilevel models.
 #'
-#'
 #' @references Efron, D. (1981). Nonparametric estimates of standard error: The jackknife, the bootstrap and other methods, Biometrika,  68(3), 589-599. doi: 10.1093/biomet/68.3.589 \cr
 #' @references Efron, B. (1987). Better bootstrap confidence intervals. Journal of the American statistical Association, 82(397), 171-185.
 #' @references Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling: A Multidisciplinary Journal, 6(1), 1-55. doi: 10.1080/10705519909540118
 #'
 #' @return An object of the class ezCutoffs, inspectable via \code{print}, \code{summary}, \code{plot}, and
 #' \code{\link{compareFit}}
-#'
 #'
 #' @examples
 #' ## model specification examples
@@ -53,7 +51,6 @@
 #'            F2 =~ b1 + start(0.8)*b2 + b3 + equal('F2 =~ b2')*b4 + b5
 #'            F1 ~~ 0*F2"
 #'
-#'
 #' ## function call
 #' out <- ezCutoffs(model = model1, n_obs = 1000, n_rep = 10, n_cores = 1)
 #' \donttest{
@@ -62,7 +59,6 @@
 #'   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts"), n_cores = 1
 #' )
 #' }
-#'
 #'
 #' ## retrieve output
 #' summary(out)
@@ -94,7 +90,6 @@ ezCutoffs <- function(model = NULL,
   
   # Create data if none is given
   if (is.null(data)) {
-    if (length(n_obs) > 1) {stop('Please provide a name for the grouping variable via group = "..."')}
     data <- simulateData(model, sample.nobs = n_obs)
   }
   
@@ -129,7 +124,6 @@ ezCutoffs <- function(model = NULL,
 
   # generate random data----------------------------------------------------------
   arg <- names(formals(dataGeneration))
-#  arg <- arg[-length(arg)]
   data_s_list <- do.call('dataGeneration', c(mget(arg)))
 
   # add missings if requested
