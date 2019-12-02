@@ -7,4 +7,5 @@
   <li>fixed a bug with the grouping variable in multigroup designs when no empirical data is given</li>
   <li>fixed a bug that forced standard Maximum Likelihood estimation in the simulations.</li>
   <li>fixed a bug with the assignment of missings in the simulated data sets.</li>
+  <li>split sub-functions internally.</li>
 </ul>

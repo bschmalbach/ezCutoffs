@@ -2,7 +2,7 @@ Package: ezCutoffs
 Date: 2019-11-09
 Type: Package
 Title: Fit Measure Cutoffs in SEM
-Version: 1.0.0
+Version: 1.0.1
 Depends: R (>= 2.15.1)
 Authors@R: c(person(given = "Bjarne", family = "Schmalbach",
                     comment = c(ORCID = "0000-0001-6853-412X"),

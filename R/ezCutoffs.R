@@ -85,70 +85,40 @@ ezCutoffs <- function(model = NULL,
                       n_cores = NULL,
                       ...) {
 
-  # empirical fit-----------------------------------------------------------------
-
+  #------------------------------------------------------------------------------
+  
   # Occurences of c( in model
   if (grepl("\\c\\(", model) == T) {
     stop("Pre-multiplication with vectors is not supported.")
   }
-
+  
   # Create data if none is given
   if (is.null(data)) {
-    data <- lavaan::simulateData(model, sample.nobs = n_obs)
+    if (length(n_obs) > 1) {stop('Please provide a name for the grouping variable via group = "..."')}
+    data <- simulateData(model, sample.nobs = n_obs)
   }
   
-  fit <- lavaan::sem(model = model, data = data,  ...) 
-  fit_measures <- lavaan::fitMeasures(fit)
-  empirical_fit <- fit_measures
+  #fit empirical
+  arg <- names(formals(empiricalFit))
+  arg <- arg[-length(arg)]
+  emp <- do.call('empiricalFit', c(mget(arg), ...))
+  for (i in seq_along(emp)) assign(names(emp)[i], emp[[i]])
 
-  # parallel processing setup -----------------------------------------------------------------------
+  # parallel processing setup ----------------------------------------------------
   if (is.null(n_cores)) {
     n_cores <- parallel::detectCores()
   } else if (!is.numeric(n_cores)) {
     n_cores <- 1
   }
 
-  # empirical fit - bootstrapped CI -----------------------------------------------------------------
+  # empirical fit - bootstrapped CI ----------------------------------------------
   if (bootstrapped_ci) {
-    
-    message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",
-                  n_boot, "Replications and Type I-Error Rate of alpha = ", boot_alpha, "...\n"))                                                
-                          
-    par_type <- ifelse(n_cores > 1, "snow", "no")
-    if (n_cores == 1) message("Only one CPU core used. Check whether this is valid.") 
-
-    if (boot_internal) {
-      fitb <- lavaan::sem(model, data, ...)                     
-      bootstrapped_fitind <- list()
-      bootstrapped_fitind$t <- lavaan::bootstrapLavaan(fitb,
-        R = n_boot,
-        FUN = lavaan::fitMeasures, parallel = par_type, ncpus = n_cores,
-        fit.measures = fit_indices
-      )
-    } else {
-       fitmeasures_bootstrap <- function(model, data, fit_indices, 
-                                         indices) { 
-         d <- data[indices, ]
-         fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
-                                           fit.measures = fit_indices), silent = T)
-
-         if (!inherits(fitb, "try-error")) {
-           return(fitb)
-         } else {
-           return(rep(NA, length(fit_indices)))
-         }
-       }
-      bootstrapped_fitind <- boot::boot(
-        data = data, model = model, fit_indices = fit_indices, statistic = fitmeasures_bootstrap,
-        R = n_boot, ncpus = n_cores, parallel = par_type
-      )
-    }
-
-    boot_ci <- t(apply(bootstrapped_fitind$t, 2, FUN = function(x) stats::quantile(x = x, probs = c(boot_alpha / 2, 1 - boot_alpha / 2))))
-    colnames(boot_ci) <- paste0(c("bootstrapped lb (", "bootstrapped ub ("), "alpha = ", boot_alpha, ") of empirical fit")
+    arg <- names(formals(bootstrap))
+    arg <- arg[-length(arg)]
+    boot_ci <- do.call('bootstrap', c(mget(arg), ...))
   }
 
-  # sanity check: fit_indices in empirical fit?--------------------------------------
+  # sanity check: fit_indices in empirical fit?-----------------------------------
   length_di <- length(fit_indices)
   for (i in 1:length_di) {
     name_warn <- fit_indices[i]
@@ -157,213 +127,31 @@ ezCutoffs <- function(model = NULL,
     }
   }
 
-  # input parameters-------------------------------------------------------------
-  pop_model <- lavaan::parTable(fit)
-  n <- sum(lavaan::lavInspect(fit, what = "nobs"))
-  groups_var <- lavaan::lavInspect(fit, what = "group")
-  n_groups <- lavaan::lavInspect(fit, what = "ngroups")
-  group_labels <- lavaan::lavInspect(fit, what = "group.label")
-  dots <- list(...)
-  # stop if grouping variable wiht only one level has been selected
-  if ((length(groups_var) > 0) & n_groups < 2) {
-    stop("Less than 2 levels in the defined grouping variable.")
-  }
-
   # generate random data----------------------------------------------------------
-
-  message("Data Generation\n")
-
-  if (normality == "empirical") { # With Skew/Kurt correction
-    var_table <- lavaan::varTable(fit)
-    skew <- moments::skewness(data[var_table$name])
-    kurt <- moments::kurtosis(data[var_table$name])
-  } else { # assume normality
-    skew <- NULL
-    kurt <- NULL
-  }
-
-  pb <- progress::progress_bar$new(
-    format = "  |:bar| :percent elapsed = :elapsed  ~ :eta",
-    total = n_rep, complete = "=", incomplete = " ", current = " ",
-    width = 80, clear = F, show_after = 0
-  )
-  progress <- function(n) {
-    pb$tick(tokens = list(trial = (1:n_rep)[n])) # token reported in progress bar
-  }
-
-  data_generation <- function() {
-    progress()
-    lavaan::simulateData(pop_model, sample.nobs = group_sizes, group.label = group_labels, skewness = skew, kurtosis = kurt)
-  }
-  
-  group_sizes <- lavaan::lavInspect(fit, what = "nobs")
-  
-  data_s_list <- vector("list", n_rep)
-  data_s_list <- replicate(n_rep, data_generation(), simplify = F)
-
-  if (n_groups > 1) { # Multigroup
-    for (i in 1:n_rep) {
-      old_names <- names(data_s_list[[i]])
-      new_names <- gsub("group", get("groups_var"), old_names)
-      names(data_s_list[[i]]) <- new_names
-    }
-  }
+  arg <- names(formals(dataGeneration))
+#  arg <- arg[-length(arg)]
+  data_s_list <- do.call('dataGeneration', c(mget(arg)))
 
   # add missings if requested
-  if (sum(is.na(data))==0) {
-    missing_data <- F
-  } #check that there actually is missing data, if not switch to complete
   if (missing_data == T) {
-    var_table <- lavaan::varTable(fit)
-
-    missings <- apply(data, 2, function(x) which(is.na(x)))
-    n_var <- nrow(var_table)
-    
-    if (is.null(dots$missing)==T) {
-      dots$missing <- "listwise"
-    }
-    if (dots$missing == "fiml") { #full misses
-      misses <- as.integer(names(which(table(unlist(missings)) == n_var)))
-      } else { # listwise, any misses
-      misses <- as.integer(names(table(unlist(missings))))
-    }
-    
-    for (i in 1:n_var) {
-          pos <- missings[[i]] %in% misses
-          missings[[i]] <- missings[[i]][!pos]
-    }                                
-                      
-    for (i in 1:n_rep) {
-      for (v in 1:nrow(var_table)) {
-        data_s_list[[i]][missings[[v]], v] <- NA # use same missing template as given data
-      }
-    }
-  }
-                      
-  # fit data in lavaan for fitmeasures()----------------------------------------------
-  message("\nModel Fitting\n")
-
-  fit_s_list <- vector("list", length = n_rep)
-   estimation <- function(i, ...) {
-     lavaan::sem(model = model, data = data_s_list[[i]], ...)
-   }
-
-  # progress bar
-  pb <- progress::progress_bar$new(
-    format = "  |:bar| :percent elapsed = :elapsed  ~ :eta",
-    total = n_rep, complete = "=", incomplete = " ", current = " ",
-    width = 80, clear = F, show_after = 0
-  )
-  progress <- function(n) {
-    pb$tick(tokens = list(trial = (1:n_rep)[n])) # token reported in progress bar
+    data_s_list <- lapply(data_s_list, missingData, fit, data, n_rep, missing_data, dots)  
   }
 
-  if (n_cores > 1) {
-    cl <- parallel::makeCluster(n_cores)
-    doSNOW::registerDoSNOW(cl)
-    # foreach loop ------------------------------------------------------------
-    fit_s_list <- foreach::foreach(i = 1:n_rep, .options.snow = list(progress = progress)) %dopar% {
-      estimation(i, ...)
-    }
-    parallel::stopCluster(cl)
-  } else {
-    for (i in 1:n_rep) {
-      fit_s <- estimation(i, ...)
-      fit_s_list[[i]] <- fit_s
-      progress(i)
-    }
-  }
+  # fit simulated data------------------------------------------------------------
+  arg <- names(formals(simFit))
+  arg <- arg[-length(arg)]
+  sim <- do.call('simFit', c(mget(arg), ...))
+  for (i in seq_along(sim)) assign(names(sim)[i], sim[[i]])
+  
+  # calculate descriptives--------------------------------------------------------
+  arg <- names(formals(calcDesc))
+  fit_simresults <- do.call('calcDesc', c(mget(arg)))
 
-  # extract fit_measures-----------------------------------------------------------
-  fit_measures_s_list <- list()
-  for (i in 1:n_rep) {
-    fit_measures_s <- try(lavaan::fitmeasures(fit_s_list[[i]], fit.measures = fit_indices), silent = T)
-    if (!inherits(fit_measures_s, "try-error")) { # if does not have issues
-      fit_measures_s_list[[i]] <- fit_measures_s # save fit indices,
-    } else { # put NA otherwise
-      fit_measures_s_list[[i]] <- rep(NA, length(fit_indices))
-    }
-  }
-
-  # get fit distributions------------------------------------------------------------
-  ncols <- length(fit_indices)
-  m_fit_measures <- matrix(NA, n_rep, ncols)
-
-  for (i in 1:n_rep) {
-    m_fit_measures[i, ] <- matrix(unlist(fit_measures_s_list[[i]]), ncol = ncols)
-  }
-
-  fit_distributions <- as.data.frame(m_fit_measures)
-  names(fit_distributions)[1:ncols] <- fit_indices
-
-  # calculate descriptives----------------------------------------------------
-  fit_simresults <- data.frame(matrix(NA, length_di, 5))
-  cutoff_name <- paste("Cutoff (alpha = ", alpha_level, ")", collapse = "", sep = "")
-  names(fit_simresults) <- c("Empirical fit", "Simulation Mean", "Simulation SD", "Simulation Median", cutoff_name)
-  rownames(fit_simresults) <- fit_indices
-
-  high_cut_index <- c(
-    "chisq", "chisq.scaled", "fmin", "aic", "bic", "bic2", "rmsea", "rmsea.scaled", "rmsea.ci.upper.scaled", "rmsea.robust",
-    "rmsea.ci.upper.robust", "rmsea.ci.upper", "rmr", "rmr_nomean", "srmr", "srmr_bentler", "srmr_bentler_nomean", "crmr",
-    "crmr_nomean", "srmr_mplus", "srmr_mplus_nomean", "ecvi"
-  )
-
-  low_cut_index <- c(
-    "pvalue", "pvalue.scaled", "cfi", "tli", "nnfi", "rfi", "nfi", "pnfi", "ifi", "rni", "cfi.scaled", "tli.scaled", "cfi.robust", "tli.robust",
-    "nnfi.scaled", "nnfi.robust", "rfi.scaled", "nfi.scaled", "ifi.scaled", "rni.scaled", "rni.robust", "logl", "unrestricted.logl", "gfi",
-    "agfi", "pgfi", "mfi", "rmsea.pvalue", "rmsea.pvalue.scaled", "rmsea.pvalue.robust", "cn_05", "cn_01"
-  )
-
-  for (i in 1:length_di) {
-    if ((fit_indices[i] %in% high_cut_index) == T) {
-      fit_simresults[i, 1] <- empirical_fit[fit_indices[i]]
-      fit_simresults[i, 2] <- mean(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 3] <- stats::sd(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 4] <- stats::median(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 5] <- stats::quantile(fit_distributions[, i], probs = (1 - alpha_level), na.rm = T)
-    } else if ((fit_indices[i] %in% low_cut_index) == T) {
-      fit_simresults[i, 1] <- empirical_fit[fit_indices[i]]
-      fit_simresults[i, 2] <- mean(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 3] <- stats::sd(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 4] <- stats::median(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 5] <- stats::quantile(fit_distributions[, i], probs = alpha_level, na.rm = T)
-    } else {
-      fit_simresults[i, 1] <- empirical_fit[fit_indices[i]]
-      fit_simresults[i, 2] <- mean(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 3] <- stats::sd(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 4] <- stats::median(fit_distributions[, i], na.rm = T)
-      fit_simresults[i, 5] <- NA
-    }
-  }
-
-  # simulation stats----------------------------------------------------------
-
-  n_conv <- sum(!is.na(fit_distributions[, 1]))
-  s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "call")$estimator
-  if (length(s_est) == 0) {
-    s_est <- lavaan::lavInspect(fit_s_list[[1]], what = "options")$estimator
-  }
-  n_sim <- 0                    
-  i <- 1
-  while (!(n_sim[1]>0)) {
-    n_sim <- lavaan::lavInspect(fit_s_list[[i]], what = "nobs")
-    i <- i+1
-  }
-  simulation_stats <- data.frame(matrix(c(n_rep, n_conv, s_est, alpha_level, n_sim), 1, (4+length(n_sim))))
-  names(simulation_stats) <- c("#Runs", "#Converged", "Estimator", "Alpha", "TotalObservations")
-  rownames(simulation_stats) <- ""
-  if (length(n_sim) > 1) {
-    names(simulation_stats)[5:(4+length(n_sim))] <- c(paste0('n_', group_labels))
-  }
-                      
-  dots <- list(...)
-  if (is.null(dots$missing)==F) {
-    simulation_stats[1, (ncol(simulation_stats)+1)] <- dots$missing
-    names(simulation_stats)[(ncol(simulation_stats))] <- "Missing"
-  }
-
-  # include bootstrapping CI in ouput -------------------------------------------
-
+  # simulation stats--------------------------------------------------------------
+  arg <- names(formals(simulationStats))
+  simulation_stats <- do.call('simulationStats', c(mget(arg)))
+ 
+  # include bootstrapping CI in ouput --------------------------------------------
   if (bootstrapped_ci == T) {
     fit_simresults <- cbind(fit_simresults, boot_ci)
   }
@@ -373,45 +161,4 @@ ezCutoffs <- function(model = NULL,
   class(ezCutoffs_out) <- "ezCutoffs"
 
   return(ezCutoffs_out)
-}
-
-# summary----------------------------------------------------------------------
-
-#' @rawNamespace S3method(summary,ezCutoffs)
-
-summary.ezCutoffs <- function(object, ...) {
-  print(object[["simulationParameters"]])
-  cat("\n")
-  print(object[["summary"]])
-}
-
-# plot---------------------------------------------------------------
-
-if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c("count"))
-}
-
-#' @export
-plot.ezCutoffs <- function(x, ...) {
-  for (i in 1:nrow(x[["summary"]])) {
-    hist_plots <- ggplot2::ggplot(x[["fitDistributions"]], ggplot2::aes_string(x = rownames(x[["summary"]])[i])) +
-      ggplot2::geom_histogram(ggplot2::aes(y = stat(count)), color = "black", fill = "white", bins = 30)
-
-    bar_height <- max(ggplot2::ggplot_build(hist_plots)$data[[1]]$count)
-
-    hist_plots <- hist_plots + ggplot2::geom_vline(xintercept = x[["summary"]][i, 1], color = "blue", alpha = 0.8) +
-      ggplot2::annotate("text", x = x[["summary"]][i, 1], y = bar_height, angle = 0, label = "Empirical") +
-      ggplot2::geom_vline(xintercept = x[["summary"]][i, 5], color = "red", alpha = 0.8) +
-      ggplot2::annotate("text", x = x[["summary"]][i, 5], y = bar_height, angle = 0, label = "Cutoff") +
-      ggplot2::labs(title = "Simulated Fit Distribution", y = "count") +
-      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
-    (print(hist_plots))
-  }
-}
-
-# print--------------------------------------------------------------------------------------------
-#' @export
-print.ezCutoffs <- function(x, ...) {
-  filter <- c(grep("Empirical", names(x$summary)), grep("Cutoff", names(x$summary)))
-  print(x$summary[, filter])
 }
