@@ -3,8 +3,8 @@ dataGeneration <- function(fit, data, normality, n_groups, group_labels, groups_
   
   if (normality == "empirical") { # With Skew/Kurt correction
     var_table <- lavaan::varTable(fit)
-    skew <- moments::skewness(data[var_table$name])
-    kurt <- moments::kurtosis(data[var_table$name])
+    skew <- moments::skewness(data[var_table$name], na.rm = TRUE)
+    kurt <- moments::kurtosis(data[var_table$name], na.rm = TRUE)
   } else { # assume normality
     skew <- NULL
     kurt <- NULL
