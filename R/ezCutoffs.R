@@ -85,18 +85,25 @@ ezCutoffs <- function(model = NULL,
   
   # Occurences of c( in model
   if (grepl("\\c\\(", model) == T) {
-    stop("Pre-multiplication with vectors is not supported.")
+    stop('Pre-multiplication with vectors is not supported. Please use "group.equal = ..." instead.')
   }
   
   # Create data if none is given
   if (is.null(data)) {
     data <- simulateData(model, sample.nobs = n_obs)
+    if (length(n_obs) > 1) {
+      if (!('group'%in%names(list(...)))) {
+        stop('Please provide a name for the grouping variable via "group = ...".')
+      } else {
+        names(data)[names(data) == 'group'] <- list(...)$group
+      }
+    }
   }
   
   #fit empirical
   arg <- names(formals(empiricalFit))
   arg <- arg[-length(arg)]
-  emp <- do.call('empiricalFit', c(mget(arg), ...))
+  emp <- do.call('empiricalFit', c(mget(arg), list(...)))
   for (i in seq_along(emp)) assign(names(emp)[i], emp[[i]])
 
   # parallel processing setup ----------------------------------------------------
@@ -110,7 +117,7 @@ ezCutoffs <- function(model = NULL,
   if (bootstrapped_ci) {
     arg <- names(formals(bootstrap))
     arg <- arg[-length(arg)]
-    boot_ci <- do.call('bootstrap', c(mget(arg), ...))
+    boot_ci <- do.call('bootstrap', c(mget(arg), list(...)))
   }
 
   # sanity check: fit_indices in empirical fit?-----------------------------------
@@ -134,7 +141,7 @@ ezCutoffs <- function(model = NULL,
   # fit simulated data------------------------------------------------------------
   arg <- names(formals(simFit))
   arg <- arg[-length(arg)]
-  sim <- do.call('simFit', c(mget(arg), ...))
+  sim <- do.call('simFit', c(mget(arg), list(...)))
   for (i in seq_along(sim)) assign(names(sim)[i], sim[[i]])
   
   # calculate descriptives--------------------------------------------------------
@@ -151,7 +158,7 @@ ezCutoffs <- function(model = NULL,
   }
 
   # generate output---------------------------------------------------------------
-  ezCutoffs_out <- list("simulationParameters" = simulation_stats, "data" = data_s_list, "fitDistributions" = fit_distributions, "summary" = fit_simresults)
+  ezCutoffs_out <- list("simulationParameters" = simulation_stats, "data" = data_s_list, "fitDistributions" = fit_distributions, "summary" = fit_simresults, "empiricalModel" = emp$fit)
   class(ezCutoffs_out) <- "ezCutoffs"
 
   return(ezCutoffs_out)
