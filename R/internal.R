@@ -1,5 +1,5 @@
 # on attach message
-.onLoad <-
+.onAttach <-
   function(libname,pkgname) {
     packageStartupMessage('ezCutoffs is in development. Please report any bugs and check https://github.com/bschmalbach/ezCutoffs for newer versions.')
   }

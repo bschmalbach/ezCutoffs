@@ -15,7 +15,7 @@ ezCutoffs(model = NULL, data = NULL, n_obs = NULL, n_rep = 1000,
 
 \item{data}{A data frame containing the variables specified in model.}
 
-\item{n_obs}{Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses.}
+\item{n_obs}{Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.}
 
 \item{n_rep}{Number of replications.}
 
@@ -70,7 +70,6 @@ model3 <- "F1 =~ NA*a1 + a2 + a3 + 0.8*a4 + a5
            F2 =~ b1 + start(0.8)*b2 + b3 + equal('F2 =~ b2')*b4 + b5
            F1 ~~ 0*F2"
 
-
 ## function call
 out <- ezCutoffs(model = model1, n_obs = 1000, n_rep = 10, n_cores = 1)
 \donttest{
@@ -79,7 +78,6 @@ out <- ezCutoffs(
   estimator = "MLM", group = "group", group.equal = c("loadings", "intercepts"), n_cores = 1
 )
 }
-
 
 ## retrieve output
 summary(out)

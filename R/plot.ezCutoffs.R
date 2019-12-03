@@ -24,14 +24,20 @@ plot.ezCutoffs <- function(x, fit_indices = NULL, type = 'histogram', ...) {
     direction = 'long',
     times = names(disti))
   
+  # escaping global assignment hell (tidyverse problems)
+  Reference <- summ$Reference
+  value <- summ$value
+  fit_index <- disti$fit_index
+  Fit <- disti$Fit
+  
   plottable <- ggplot2::ggplot(disti, ggplot2::aes(x = Fit, group = fit_index)) +
-    ggplot2::theme(title = ggplot2::element_text('Simulated Fit Distribution')) +
+    ggplot2::labs(title = 'Simulated Fit Distribution') +
     ggplot2::facet_wrap(~ fit_index, scales = 'free')
 
   if (type == 'density') {
     plottable <- plottable + ggplot2::geom_density()
   } else {
-    plottable <- plottable + ggplot2::geom_histogram(ggplot2::aes(y = ..density..))
+    plottable <- plottable + ggplot2::geom_histogram()
   }
   
   plottable <- plottable + 
