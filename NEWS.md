@@ -8,4 +8,7 @@
   <li>fixed a bug that forced standard Maximum Likelihood estimation in the simulations.</li>
   <li>fixed a bug with the assignment of missings in the simulated data sets.</li>
   <li>split sub-functions internally.</li>
+  <li>corrected handling of NAs in skewness/kurtosis function</li>
+  <li>updated plotting function, made it more accessible as a ggplot2 object</li>
+  <li>added empirical fit results to the output</li>
 </ul>
