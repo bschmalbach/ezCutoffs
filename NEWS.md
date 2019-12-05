@@ -1,3 +1,10 @@
+### ezCutoffs 1.0.2
+
+<ul>
+  <li>TODO: implemented convenience function for determining measurement invariance cutoffs.</li>
+</ul>
+
+
 ### ezCutoffs 1.0.1
 
 <ul>
