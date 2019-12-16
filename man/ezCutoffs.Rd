@@ -40,8 +40,9 @@ ezCutoffs(model = NULL, data = NULL, n_obs = NULL, n_rep = 1000,
 \item{...}{Additional arguments to pass to \link[lavaan]{lavaan}.}
 }
 \value{
-An object of the class ezCutoffs, inspectable via \code{print}, \code{summary}, \code{plot}, and
-\code{\link{compareFit}}
+An object of the class ezCutoffs, containing the function call, arguments, simulation statistics, the simulated and (if given) the empirical data sets, fit distributions, the empirical model, and a summary.
+For ease of analysis, it is further inspectable via \code{print}, \code{summary}, \code{plot}, 
+\code{\link{compareFit}}, and \code{\link{invarianceCutoffs}}.
 }
 \description{
 Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.

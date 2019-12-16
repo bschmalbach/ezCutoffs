@@ -2,9 +2,10 @@ simFit <- function(model, data_s_list, n_rep, n_cores, fit_indices, ...) {
   message("\nModel Fitting\n")
   
   fit_s_list <- vector("list", length = n_rep)
+  
   estimation <- function(i, ...) {
-    lavaan::sem(model = model, data = data_s_list[[i]], ...)
-  }
+      lavaan::sem(model = model, data = data_s_list[[i]], ...)
+    }
   
   # progress bar
   pb <- progress::progress_bar$new(

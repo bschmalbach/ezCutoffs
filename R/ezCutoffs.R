@@ -31,8 +31,9 @@
 #' @references Efron, B. (1987). Better bootstrap confidence intervals. Journal of the American statistical Association, 82(397), 171-185.
 #' @references Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling: A Multidisciplinary Journal, 6(1), 1-55. doi: 10.1080/10705519909540118
 #'
-#' @return An object of the class ezCutoffs, inspectable via \code{print}, \code{summary}, \code{plot}, and
-#' \code{\link{compareFit}}
+#' @return An object of the class ezCutoffs, containing the function call, arguments, simulation statistics, the simulated and (if given) the empirical data sets, fit distributions, the empirical model, and a summary.
+#' For ease of analysis, it is further inspectable via \code{print}, \code{summary}, \code{plot}, 
+#' \code{\link{compareFit}}, and \code{\link{invarianceCutoffs}}.
 #'
 #' @examples
 #' ## model specification examples
@@ -158,9 +159,24 @@ ezCutoffs <- function(model = NULL,
   if (bootstrapped_ci == T) {
     fit_simresults <- cbind(fit_simresults, boot_ci)
   }
-
+  
   # generate output---------------------------------------------------------------
-  ezCutoffs_out <- list("simulationParameters" = simulation_stats, "data" = data_s_list, "fitDistributions" = fit_distributions, "summary" = fit_simresults, "empiricalModel" = emp$fit)
+  call <- as.list(match.call())
+  call <- call[-1]
+  call[["model"]] <- model
+  call[["dots"]] <- dots
+  
+  if (exists("n_rep")==F) {n_rep <- 1000}
+  if (exists("fit_indices")==F) {fit_indices <- c("chisq", "cfi", "tli", "rmsea", "srmr")}
+  if (exists("alpha_level")==F) {alpha_level <- .05}
+  if (exists("bootstrapped_ci")==F) {bootstrapped_ci <- F}
+  if (exists("n_boot")==F) {n_boot <- 1000}
+  if (exists("boot_alpha")==F) {boot_alpha <- .05}
+  if (exists("boot_internal")==F) {boot_internal <- F}
+  
+  arguments <- list("n_rep"=n_rep, "fit_indices"=fit_indices, "alpha_level"=alpha_level, "bootstrapped_ci"=bootstrapped_ci, 
+                    "n_boot"=n_boot, "boot_alpha"=boot_alpha, "boot_internal"=boot_internal, "no_emp_data"=no_emp_data)
+  ezCutoffs_out <- list("call" = call, "simulationParameters" = simulation_stats, "data" = data, "simData" = data_s_list, "fitDistributions" = fit_distributions, "summary" = fit_simresults, "empiricalModel" = emp$fit, "arguments" = arguments)
   class(ezCutoffs_out) <- "ezCutoffs"
   
   return(ezCutoffs_out)

@@ -5,5 +5,6 @@
   }
 # define some global variables
 if (getRversion() >= "2.15.1") {
-  utils::globalVariables(c("count", "empirical_fit", "fit", "dots", "fit_distributions"))
+  utils::globalVariables(c("count", "empirical_fit", "fit", "dots", "fit_distributions", "arguments", "simData", "simulationParameters", 
+                           "fitDistributions", "empiricalModel", "alpha_level", "fit_indices"))
 }

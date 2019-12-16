@@ -5,7 +5,7 @@
 #' @param y A second \code{ezCutoffs} object to compare \code{x} to.
 #' @param ...	 Additional arguments to pass to \link[stats]{wilcox.test}.
 #' @details Non-overlapping fit measures will be disregarded by the funciton.
-#' @return An object of the class \code{wilc_result}, inspectable via \code{summary}.
+#' @return An object of the class \code{wilc_result}, containing the results of the Wilcoxon-test, futher inspectable via \code{summary}.
 #' @examples
 #' ## model specification examples
 #'

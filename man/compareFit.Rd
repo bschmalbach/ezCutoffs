@@ -14,7 +14,7 @@ compareFit(x, y, ...)
 \item{...}{Additional arguments to pass to \link[stats]{wilcox.test}.}
 }
 \value{
-An object of the class \code{wilc_result}, inspectable via \code{summary}.
+An object of the class \code{wilc_result}, containing the results of the Wilcoxon-test, futher inspectable via \code{summary}.
 }
 \description{
 Significane test of the difference between two randomly generated fit index distributions using the Wilcoxon rank sum test.

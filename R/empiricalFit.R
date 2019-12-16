@@ -1,4 +1,5 @@
 empiricalFit <- function(model, data, fit_indices, ...) {
+
   fit <- lavaan::sem(model = model, data = data, ...)
   empirical_fit <- lavaan::fitMeasures(fit, fit.measures = fit_indices)
 
@@ -20,3 +21,6 @@ empiricalFit <- function(model, data, fit_indices, ...) {
   
   return(out)
 }
+
+
+

@@ -1,6 +1,6 @@
 
 bootstrap <- function(model, data, missing_data, fit_indices, n_cores,
-                      n_boot, boot_alpha, boot_internal, ...) {
+                      n_boot, boot_alpha, boot_internal, constr = NULL, ...) {
   message(paste("Bootstrapping Confidence Interval for Model Fit Indices with",
               n_boot, "Replications and Type I-Error Rate of alpha = ", boot_alpha, "...\n"))                                                
 
@@ -8,7 +8,12 @@ bootstrap <- function(model, data, missing_data, fit_indices, n_cores,
   if (n_cores == 1) message("Only one CPU core used. Check whether this is valid.") 
 
   if (boot_internal) {
-    fitb <- lavaan::sem(model, data, ...)                     
+    if (length(constr) == 0) {
+      fitb <- lavaan::sem(model, data, ...)  
+    } else {
+      fitb <- lavaan::sem(model, data, group.equal = constr, ...)  
+    }
+    
     bootstrapped_fitind <- list()
     bootstrapped_fitind$t <- lavaan::bootstrapLavaan(fitb,
                                                    R = n_boot,
@@ -19,9 +24,15 @@ bootstrap <- function(model, data, missing_data, fit_indices, n_cores,
     fitmeasures_bootstrap <- function(model, data, fit_indices, 
                                     indices) { 
       d <- data[indices, ]
-      fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
-                                    fit.measures = fit_indices), silent = T)
-    
+      
+      if (is.null(constr) == T) {
+        fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
+                                        fit.measures = fit_indices), silent = T)
+      } else {
+        fitb <- try(lavaan::fitmeasures(lavaan::sem(model, d, ...),             
+                                        fit.measures = fit_indices, group.equal = constr), silent = T) 
+      }
+      
       if (!inherits(fitb, "try-error")) {
         return(fitb)
       } else {
