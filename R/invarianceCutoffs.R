@@ -63,6 +63,7 @@ invarianceCutoffs <- function(input = NULL,
   
   # checks
   if (exists("group")==F) {"No grouping variable has been defined."}
+  if (exists("n_cores")==F) {n_cores <- NULL}
   
   # justFit
   arg <- names(formals(justFit))
