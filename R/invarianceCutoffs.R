@@ -46,6 +46,7 @@ invarianceCutoffs <- function(input = NULL,
   for (i in seq_along(call)) assign(names(call)[i], call[[i]])
   for (i in seq_along(arguments)) assign(names(arguments)[i], arguments[[i]])
   data_s_list <- simData
+  data <- input$data
   
   #compare dots, o_dotsdots and arguments from call
   o_dots <- dots
