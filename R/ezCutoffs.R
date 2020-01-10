@@ -1,5 +1,5 @@
 #' Fit Measure Cutoffs in SEM
-#' @import ggplot2 lavaan moments progress utils
+#' @import dplyr ggplot2 lavaan moments progress utils
 #' @importFrom doSNOW registerDoSNOW
 #' @importFrom foreach %dopar%
 #' @importFrom parallel detectCores makeCluster stopCluster
@@ -7,7 +7,7 @@
 #' @description Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 #' @param model \link[lavaan]{lavaan}-style Syntax of a user-specified model.
 #' @param data A data frame containing the variables specified in model.
-#' @param n_obs Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.
+#' @param n_obs Specifies the number of observations to be sampled. Not needed when an empirical data set of interest is given, unless subsampling of the data is desired. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.
 #' @param n_rep Number of replications.
 #' @param fit_indices Character vector, containing a selection of fit indices for which to calculate cutoff values. Only measures produced by \link[lavaan]{fitMeasures} can be chosen.
 #' @param alpha_level Type I-error rate for the generated cutoff values: Between 0 and 1; 0.05 per default.
@@ -132,13 +132,19 @@ ezCutoffs <- function(model = NULL,
     }
   }
 
-  # generate random data----------------------------------------------------------
-  arg <- names(formals(dataGeneration))
-  data_s_list <- do.call('dataGeneration', c(mget(arg)))
-
-  # add missings if requested
-  if (missing_data == T) {
-    data_s_list <- lapply(data_s_list, missingData, fit, data, n_rep, missing_data, dots)  
+  # generate random samples----------------------------------------------------------
+  
+  if (is.null(data)==F & is.null(n_obs)==F) {
+    arg <- names(formals(sampleData))
+    data_s_list <- do.call('sampleData', c(mget(arg)))
+  } else {
+    arg <- names(formals(dataGeneration))
+    data_s_list <- do.call('dataGeneration', c(mget(arg)))
+    
+    # add missings if requested
+    if (missing_data == T) {
+      data_s_list <- lapply(data_s_list, missingData, fit, data, n_rep, missing_data, dots)  
+    }
   }
 
   # fit simulated data------------------------------------------------------------
