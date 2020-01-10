@@ -15,7 +15,7 @@ ezCutoffs(model = NULL, data = NULL, n_obs = NULL, n_rep = 1000,
 
 \item{data}{A data frame containing the variables specified in model.}
 
-\item{n_obs}{Specifies the number of observations. Only needed if no data frame is given. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.}
+\item{n_obs}{Specifies the number of observations to be sampled. Not needed when an empirical data set of interest is given, unless subsampling of the data is desired. Can be given as a numeric vector representing the exact group sizes in multigroup analyses. In this case, the grouping variable needs to be called \code{"group"}.}
 
 \item{n_rep}{Number of replications.}
 
