@@ -12,7 +12,7 @@ Authors@R: c(person(given = "Bjarne", family = "Schmalbach",
               person(given = "Martin", family = "Schultze", role = "aut"))
 Description: Calculate cutoff values for model fit measures used in structural equation modeling (SEM) by simulating and testing data sets (cf. Hu & Bentler, 1999 <doi:10.1080/10705519909540118>) with the same parameters (population model, number of observations, etc.) as the model under consideration.
 License: GPL-3
-Imports: doSNOW, foreach, ggplot2, lavaan, methods, moments, parallel, progress,
+Imports: doSNOW, dplyr, foreach, ggplot2, lavaan, methods, moments, parallel, progress,
         stats, utils
 Suggests: boot
 Maintainer: Bjarne Schmalbach <bjarne.schmalbach@gmail.com>
