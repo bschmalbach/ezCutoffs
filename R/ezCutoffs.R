@@ -18,7 +18,10 @@
 #' @param boot_alpha Type I-error rate choosen for the boostrap-confidence interval: Between 0 and 1; 0.05 per default.
 #' @param boot_internal Whether to use the internal boostrap implemented in \code{bootstrapLavaan} or a standard implementation in the \link{boot} package. Defaults to \code{FALSE}
 #' @param n_cores The number of cores to use. If \code{NULL} (the default) all available cores will be used.
-#' @param ...	Additional arguments to pass to \link[lavaan]{lavaan}.
+#' @param rescale Only relevant, when data are categorial, but assumed as continous. Indicator whether data should be rescaled to have the same mean and variance as the corresponding continous data. Default to \code{FALSE}.
+#' @param n_cat Number of categories to categorize simulated continous data. Can be vector or single value to fit all.
+#' @param condition Condition to categorize data by defining the way the category thresholds are drawn (based on Rhemtulla, Brosseau-Liard, & Savalei, 2012). Maybe vector or single value to fit all. All thresholds are drawn from a standard normal distribution. Data are standardized accordingly. Default to \code{"symmetric"} = thresholds are drawn symmetrically, \code{"mod.asym"} = thresholds are drawn moderately asymetrically, \code{"ext.asym"} = thresholds are drawn extremely asymmetrically , \code{"mod.asym-alt"} = alternating moderate asymmetrical condition, \code{"ext.asym-alt"} = alternating extreme asymmetrical condition.
+#' @param data_assumption Assumption of how data are measured. Default to \code{"continous"} = data are assumed to be continous. \code{"categorical_assumed_continous"} = data are collected categorical, but are assumed to measure continous variables (e.g., by the use of anchored Likert scales). \code{"categorical"} = data are assumed to be categorical and will be treated as categorical. 
 #'
 #' @details
 #' \code{model} is expected in standard lavaan nomenclature. The typical pre-multiplication mechanism is supported, with the exception of vectors (see Examples). Multigroup models should instead be specified using the \code{group} argument. \cr\cr
@@ -30,6 +33,7 @@
 #' @references Efron, D. (1981). Nonparametric estimates of standard error: The jackknife, the bootstrap and other methods, Biometrika,  68(3), 589-599. doi: 10.1093/biomet/68.3.589 \cr
 #' @references Efron, B. (1987). Better bootstrap confidence intervals. Journal of the American statistical Association, 82(397), 171-185.
 #' @references Hu, L. T., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in covariance structure analysis: Conventional criteria versus new alternatives. Structural Equation Modeling: A Multidisciplinary Journal, 6(1), 1-55. doi: 10.1080/10705519909540118
+#' @references Rhemtulla, M., Brosseau-Liard, P. É., & Savalei, V. (2012). When can categorical variables be treated as continuous? A comparison of robust continuous and categorical SEM estimation methods under suboptimal conditions. Psychological Methods, 17, 354–373. doi:10.1037/a0029315
 #'
 #' @return An object of the class ezCutoffs, containing the function call, arguments, simulation statistics, the simulated and (if given) the empirical data sets, fit distributions, the empirical model, and a summary.
 #' For ease of analysis, it is further inspectable via \code{print}, \code{summary}, \code{plot}, 
@@ -80,6 +84,10 @@ ezCutoffs <- function(model = NULL,
                       boot_alpha = 0.05,
                       boot_internal = FALSE,
                       n_cores = NULL,
+                      rescale = F,
+                      n_cat = 5,
+                      condition = "symmetric",
+                      data_assumption = "continous",
                       ...) {
 
   #------------------------------------------------------------------------------
@@ -108,6 +116,26 @@ ezCutoffs <- function(model = NULL,
   arg <- arg[-length(arg)]
   emp <- do.call('empiricalFit', c(mget(arg), list(...)))
   for (i in seq_along(emp)) assign(names(emp)[i], emp[[i]])
+  
+  # checking data properties: continous, assumed continous or categorical ---------
+  if(data_assumption == "categorical_assumed_continous")
+  {
+       if(length(emp$groups_var) == 0) # checking, whether grouping is done in analysis
+       {
+            if( (length(condition) > 1 & dim(vartable(fit))[1] != length(condition)) |
+                    (length(n_cat) > 1 & length(n_cat) != dim(vartable(fit))[1])) stop("Wrong dimension of conditions or number of categories for the categorization of continous data.")
+            
+       }else{
+            if( (length(condition) > 1 & (dim(vartable(fit))[1] - 1) != length(condition)) |
+                        (length(n_cat) > 1 & length(n_cat) != (dim(vartable(fit))[1] - 1))) stop("Wrong dimension of conditions or number of categories for the categorization of continous data.")
+            
+            if(length(n_cat) == 1)       n_cat <- c(rep(n_cat, (dim(vartable(fit))[1] - 1)), NA)
+            if(length(condition) == 1)   condition <- c(rep(condition, (dim(vartable(fit))[1] - 1)), NA) # NA, as the grouping variable should not be categorized or rescaled!
+       }
+       
+       if(any(n_cat > 7)) stop("Only less than 8 categories are possible for now... Use NA instead for treating variables as continous!")
+  }
+  
 
   # parallel processing setup ----------------------------------------------------
   if (is.null(n_cores)) {
@@ -135,6 +163,19 @@ ezCutoffs <- function(model = NULL,
   # generate random data----------------------------------------------------------
   arg <- names(formals(dataGeneration))
   data_s_list <- do.call('dataGeneration', c(mget(arg)))
+  
+  
+  # change scaling of data if requested: from continous to assumed continous (categorical) -----
+  if(data_assumption == "categorical_assumed_continous")
+  {
+       message("Data are being categorized, but assumed to be continous.")
+       datalist <- data_s_list
+       arg <- names(formals(categorize_data_list))
+       data_s_list <- do.call('categorize_data_list', c(mget(arg)))
+  }
+
+  
+  
 
   # add missings if requested
   if (missing_data == T) {
