@@ -4,11 +4,22 @@
 \alias{ezCutoffs}
 \title{Fit Measure Cutoffs in SEM}
 \usage{
-ezCutoffs(model = NULL, data = NULL, n_obs = NULL, n_rep = 1000,
+ezCutoffs(
+  model = NULL,
+  data = NULL,
+  n_obs = NULL,
+  n_rep = 1000,
   fit_indices = c("chisq", "cfi", "tli", "rmsea", "srmr"),
-  alpha_level = 0.05, normality = "assumed", missing_data = FALSE,
-  bootstrapped_ci = FALSE, n_boot = 1000, boot_alpha = 0.05,
-  boot_internal = FALSE, n_cores = NULL, ...)
+  alpha_level = 0.05,
+  normality = "assumed",
+  missing_data = FALSE,
+  bootstrapped_ci = FALSE,
+  n_boot = 1000,
+  boot_alpha = 0.05,
+  boot_internal = FALSE,
+  n_cores = NULL,
+  ...
+)
 }
 \arguments{
 \item{model}{\link[lavaan]{lavaan}-style Syntax of a user-specified model.}
