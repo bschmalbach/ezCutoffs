@@ -19,7 +19,7 @@
 #' @param boot_internal Whether to use the internal boostrap implemented in \code{bootstrapLavaan} or a standard implementation in the \link{boot} package. Defaults to \code{FALSE}
 #' @param n_cores The number of cores to use. If \code{NULL} (the default) all available cores will be used.
 #' @param rescale Only relevant, when data are categorial, but assumed as continous. Indicator whether data should be rescaled to have the same mean and variance as the corresponding continous data. Default to \code{FALSE}.
-#' @param n_cat Number of categories to categorize simulated continous data. Can be vector or single value to fit all.
+#' @param n_cat Number of categories to categorize simulated continous data. Can be vector or single value to fit all. \code{2} to \code{7} categories are possible for now. If \code{NA}, no categorization is done.
 #' @param condition Condition to categorize data by defining the way the category thresholds are drawn (based on Rhemtulla, Brosseau-Liard, & Savalei, 2012). Maybe vector or single value to fit all. All thresholds are drawn from a standard normal distribution. Data are standardized accordingly. Default to \code{"symmetric"} = thresholds are drawn symmetrically, \code{"mod.asym"} = thresholds are drawn moderately asymetrically, \code{"ext.asym"} = thresholds are drawn extremely asymmetrically , \code{"mod.asym-alt"} = alternating moderate asymmetrical condition, \code{"ext.asym-alt"} = alternating extreme asymmetrical condition.
 #' @param data_assumption Assumption of how data are measured. Default to \code{"continous"} = data are assumed to be continous. \code{"categorical_assumed_continous"} = data are collected categorical, but are assumed to measure continous variables (e.g., by the use of anchored Likert scales). \code{"categorical"} = data are assumed to be categorical and will be treated as categorical. 
 #'
@@ -120,20 +120,16 @@ ezCutoffs <- function(model = NULL,
   # checking data properties: continous, assumed continous or categorical ---------
   if(data_assumption == "categorical_assumed_continous")
   {
-       if(length(emp$groups_var) == 0) # checking, whether grouping is done in analysis
-       {
-            if( (length(condition) > 1 & dim(vartable(fit))[1] != length(condition)) |
-                    (length(n_cat) > 1 & length(n_cat) != dim(vartable(fit))[1])) stop("Wrong dimension of conditions or number of categories for the categorization of continous data.")
-            
-       }else{
-            if( (length(condition) > 1 & (dim(vartable(fit))[1] - 1) != length(condition)) |
-                        (length(n_cat) > 1 & length(n_cat) != (dim(vartable(fit))[1] - 1))) stop("Wrong dimension of conditions or number of categories for the categorization of continous data.")
-            
-            if(length(n_cat) == 1)       n_cat <- c(rep(n_cat, (dim(vartable(fit))[1] - 1)), NA)
-            if(length(condition) == 1)   condition <- c(rep(condition, (dim(vartable(fit))[1] - 1)), NA) # NA, as the grouping variable should not be categorized or rescaled!
-       }
+       if(any(n_cat[!is.na(n_cat)] > 7)) stop("Only less than 8 categories are possible for now... Use NA instead for treating variables as continous!")
+       if( (length(condition) > 1 & dim(vartable(fit))[1] != length(condition)) |
+           (length(n_cat) > 1 & length(n_cat) != dim(vartable(fit))[1])) stop("Wrong dimension of conditions or number of categories for the categorization of continous data.")
        
-       if(any(n_cat > 7)) stop("Only less than 8 categories are possible for now... Use NA instead for treating variables as continous!")
+       if(length(emp$groups_var) != 0) # checking, whether grouping is done in analysis
+       {
+            if(length(n_cat) == 1){ n_cat <- c(rep(n_cat, (dim(vartable(fit))[1])), NA)}else{ n_cat <- c(n_cat, NA)}
+            if(length(condition) == 1){ condition <- c(rep(condition, (dim(vartable(fit))[1])), NA) }else{ condition <- c(condition, NA)}
+            # NA, as the grouping variable should not be categorized or rescaled!
+       }
   }
   
 
@@ -172,6 +168,7 @@ ezCutoffs <- function(model = NULL,
        datalist <- data_s_list
        arg <- names(formals(categorize_data_list))
        data_s_list <- do.call('categorize_data_list', c(mget(arg)))
+       rm(datalist) # remove continous data --> could be saved for later use also
   }
 
   
