@@ -118,6 +118,7 @@ ezCutoffs <- function(model = NULL,
   for (i in seq_along(emp)) assign(names(emp)[i], emp[[i]])
   
   # checking data properties: continous, assumed continous or categorical ---------
+  if(!(data_assumption %in% c("continous", "categorical_assumed_continous", "categorical"))) stop("data_assumption is not correctly specified. See documentation for help!")
   if(data_assumption == "categorical_assumed_continous")
   {
        if(any(n_cat[!is.na(n_cat)] > 7)) stop("Only less than 8 categories are possible for now... Use NA instead for treating variables as continous!")
