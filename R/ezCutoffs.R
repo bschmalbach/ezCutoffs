@@ -137,7 +137,7 @@ ezCutoffs <- function(model = NULL,
 
   # add missings if requested
   if (missing_data == T) {
-    data_s_list <- lapply(data_s_list, missingData, fit, data, n_rep, missing_data, dots)  
+    data_s_list <- missingData(data_s_list, fit, data, n_rep, missing_data, dots)
   }
 
   # fit simulated data------------------------------------------------------------
