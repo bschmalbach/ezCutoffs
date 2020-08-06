@@ -1,33 +1,46 @@
 missingData <- function(simu, fit, data, n_rep, missing_data, dots) {
   
-  if (sum(is.na(data))==0) {
+  message('\nIncorporating Missing Data\n')
+  
+  if (!any(is.na(data))) {
     missing_data <- F
   } #check that there actually is missing data, if not switch to complete
   if (missing_data == T) {
     var_table <- lavaan::varTable(fit)
     
-    missings <- apply(data, 2, function(x) which(is.na(x)))
+    missings <- is.na(data)
     n_var <- nrow(var_table)
     
     if (is.null(dots$missing)==T) {
       dots$missing <- "listwise"
     }
-    if (dots$missing == "fiml") { #full misses
-      misses <- as.integer(names(which(table(unlist(missings)) == n_var)))
+    if (grepl('fiml', dots$missing, ignore.case = TRUE)) { #full misses
+      misses <- rowSums(missings) == n_var
     } else { # listwise, any misses
-      misses <- as.integer(names(table(unlist(missings))))
+      misses <- rowSums(missings) > 0
     }
     
-    for (i in 1:n_var) {
-      pos <- missings[[i]] %in% misses
-      missings[[i]] <- missings[[i]][!pos]
-    }                                
-    
-    for (i in 1:n_rep) {
-      for (v in 1:nrow(var_table)) {
-        simu[missings[[v]], v] <- NA # use same missing template as given data
-      }
+    missings <- missings[!misses, ]
+  
+    # progress bar
+    pb <- progress::progress_bar$new(
+      format = "  |:bar| :percent elapsed = :elapsed  ~ :eta",
+      total = n_rep, complete = "=", incomplete = " ", current = " ",
+      width = 80, clear = F, show_after = 0
+    )
+    progress <- function(n) {
+      pb$tick(tokens = list(trial = (1:n_rep)[n])) # token reported in progress bar
     }
+    
+    # single replication
+    replic <- function(repl_data) {
+      progress()
+      repl_data[missings] <- NA
+      return(repl_data)
+    }
+    
+    simu <- lapply(simu, replic)
   }    
+  
   return(simu)
 }
